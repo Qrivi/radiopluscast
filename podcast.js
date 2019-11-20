@@ -68,7 +68,7 @@ app.get('/:showId', function (req, res) {
     })
   })
 
-  res.set('Content-Type', 'application/json; charset=UTF-8')
+  res.set('Content-Type', 'application/rss+xml; charset=UTF-8')
     .status(200)
     .send(feed.buildXml())
 })
