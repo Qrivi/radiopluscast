@@ -1,0 +1,53 @@
+{
+  "name": "radiopluscast",
+  "version": "1.0.0",
+  "description": "Podcast \"interface\" for Radioplus.be",
+  "main": "podcast.js",
+  "scripts": {
+    "start": "node podcast.js",
+    "dev": "nodemon podcast.js --exec \"npm run lintfix && node\"",
+    "watch": "nodemon podcast.js",
+    "lint": "standardx",
+    "lintfix": "standardx --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Qrivi/radiopluscast.git"
+  },
+  "keywords": [
+    "radio",
+    "podcast",
+    "vrt"
+  ],
+  "author": "Kristof Dewilde <git@krivi.be>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Qrivi/radiopluscast/issues"
+  },
+  "homepage": "https://github.com/Qrivi/radiopluscast#readme",
+  "dependencies": {
+    "dateformat": "^3.0.3",
+    "express": "^4.17.1",
+    "podcast": "^1.1.0",
+    "sync-request": "^6.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4",
+    "standardx": "^5.0.0"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "env": {
+      "es6": true
+    },
+    "rules": {
+      "brace-style": [
+        "error",
+        "1tbs"
+      ]
+    }
+  }
+}
