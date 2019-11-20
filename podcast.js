@@ -64,7 +64,11 @@ app.get('/:showId', function (req, res) {
       description: `Aflevering van ${format(episode.startTime, 'dddd d mmmm yyyy')}. ${episode.description}`,
       url: episode.stream,
       author: `${data.station.name}, ${episode.name}, VRT`,
-      date: episode.startTime
+      date: episode.startTime,
+      enclosure: {
+        url: episode.stream,
+        type: 'audio/mpeg'
+      }
     })
   })
 
