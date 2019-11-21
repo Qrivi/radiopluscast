@@ -44,7 +44,7 @@ function msToHMS (ms) {
   const minutes = parseInt(seconds / 60)
   seconds = seconds % 60
 
-  return `${hours}:${minutes}:${seconds}`
+  return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
 app.use(express.urlencoded({ extended: true }))
