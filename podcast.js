@@ -39,9 +39,25 @@ function fetch (showId) {
 app.use(express.urlencoded({ extended: true }))
 
 app.get('/:showId', function (req, res) {
-  console.log(`${format(new Date())}: Fetching details.`)
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(req.params.showId)) {
+    return res.status(400)
+      .json({
+        status: 400,
+        error: 'Bad Request',
+        message: 'The show UUID is malformatted'
+      })
+  }
 
   const data = fetch(req.params.showId)
+
+  if (!data || !data.show) {
+    return res.status(404)
+      .json({
+        status: 404,
+        error: 'Not Found',
+        message: 'The show UUID does not exist'
+      })
+  }
   const feed = new Podcast({
     title: `${data.show.name}`,
     description: `${data.show.description} | ${data.station.name} - ${data.station.description}`,
@@ -71,6 +87,7 @@ app.get('/:showId', function (req, res) {
     })
   })
 
+  // res.set('Content-Type', 'text/xml; charset=UTF-8')
   res.set('Content-Type', 'application/rss+xml; charset=UTF-8')
     .status(200)
     .send(feed.buildXml())
