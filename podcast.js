@@ -90,9 +90,10 @@ app.get('/:showId', function (req, res) {
   })
 
   data.show.items.forEach(episode => {
+    episode.endTime = new Date(episode.startTime)
+    episode.endTime.setMilliseconds(episode.endTime.getMilliseconds() + episode.duration)
     episode.startTime = new Date(episode.startTime)
-    episode.startTime.setSeconds(episode.startTime.getSeconds() + 1)
-    episode.endTime = episode.startTime + episode.duration
+    episode.startTime.setMilliseconds(episode.startTime.getMilliseconds() + 1000)
 
     feed.addItem({
       title: `${format(episode.startTime, 'dddd d mmmm, H:MM')} - ${format(episode.endTime, 'H:MM')}`,
