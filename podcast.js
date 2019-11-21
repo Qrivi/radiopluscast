@@ -111,6 +111,15 @@ app.get('/:showId', function (req, res) {
     })
   })
 
+  if (req.query.format.toLowerCase() === 'json') {
+    return res.status(200)
+      .json({
+        status: 200,
+        error: 'OK',
+        data
+      })
+  }
+
   // res.set('Content-Type', 'text/xml; charset=UTF-8')
   res.set('Content-Type', 'application/rss+xml; charset=UTF-8')
     .status(200)
