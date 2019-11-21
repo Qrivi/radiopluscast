@@ -96,7 +96,7 @@ app.get('/:showId', function (req, res) {
     episode.startTime.setMilliseconds(episode.startTime.getMilliseconds() + 1000)
 
     feed.addItem({
-      title: `${format(episode.startTime, 'dddd d mmmm, H:MM')} - ${format(episode.endTime, 'H:MM')}`,
+      title: `${format(episode.startTime, 'dddd d mmmm, HH:MM')} - ${format(episode.endTime, 'HH:MM')}`,
       url: episode.stream,
       date: episode.startTime,
       description: `Herbeluister ${data.show.name} van ${format(episode.startTime, 'ddd d mmmm yyyy')}. ${episode.description}`,
