@@ -10,8 +10,8 @@ const port = process.env.PORT || 3000
 
 format.i18n = {
   dayNames: [
-    'zo', 'ma', 'di', 'wo', 'do', 'vr', 'za',
-    'zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'
+    'zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag',
+    'Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'
   ],
   monthNames: [
     'jan', 'feb', 'mar', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec',
@@ -36,6 +36,17 @@ function fetch (showId) {
   }
 }
 
+function msToHMS (ms) {
+  let seconds = ms / 1000
+
+  const hours = parseInt(seconds / 3600)
+  seconds = seconds % 3600
+  const minutes = parseInt(seconds / 60)
+  seconds = seconds % 60
+
+  return `${hours}:${minutes}:${seconds}`
+}
+
 app.use(express.urlencoded({ extended: true }))
 
 app.get('/:showId', function (req, res) {
@@ -58,31 +69,43 @@ app.get('/:showId', function (req, res) {
         message: 'The show UUID does not exist'
       })
   }
+
   const feed = new Podcast({
     title: `${data.show.name}`,
-    description: `${data.show.description} | ${data.station.name} - ${data.station.description}`,
-    generator: 'radiopluscast',
-    feedUrl: req.protocol + '://' + req.get('host') + req.originalUrl,
     siteUrl: data.station.website,
     imageUrl: data.show.image,
-    docs: 'https://github.com/Qrivi/radiopluscast/blob/master/README.md',
+    description: `Herbeluister de meest recente afleveringen van ${data.show.name} op ${data.station.name} - ${data.station.description}. ${data.show.description} `,
+    itunesSummary: `Herbeluister de meest recente afleveringen van ${data.show.name} op ${data.station.name} - ${data.station.description}. ${data.show.description} `,
+    itunesSubtitle: data.show.description,
     author: data.station.name,
+    itunesAuthor: data.station.name,
+    itunesOwner: 'VRT',
+    generator: 'radiopluscast',
+    feedUrl: req.protocol + '://' + req.get('host') + req.originalUrl,
+    docs: 'https://github.com/Qrivi/radiopluscast/blob/master/README.md',
     copyright: `VRT © ${format(new Date(), 'yyyy')}`,
-    language: 'nl',
-    categories: ['Music', 'Entertainment'],
+    language: 'nl-be',
+    categories: ['Music'],
     ttl: 60
   })
 
   data.show.items.forEach(episode => {
+    episode.startTime = new Date(episode.startTime)
+    episode.startTime.setSeconds(episode.startTime.getSeconds() + 1)
+    episode.endTime = episode.startTime + episode.duration
+
     feed.addItem({
-      title: `${episode.title} - ${format(episode.startTime, 'dddd d mmmm')}`,
-      description: `Aflevering van ${format(episode.startTime, 'dddd d mmmm yyyy')}. ${episode.description}`,
+      title: `${format(episode.startTime, 'dddd d mmmm, H:MM')} - ${format(episode.endTime, 'H:MM')}`,
       url: episode.stream,
-      author: `${data.station.name}, ${episode.name}, VRT`,
       date: episode.startTime,
+      description: `Herbeluister ${data.show.name} van ${format(episode.startTime, 'ddd d mmmm yyyy')}. ${episode.description}`,
+      itunesSummary: `Herbeluister ${data.show.name} van ${format(episode.startTime, 'ddd d mmmm yyyy')}. ${episode.description}`,
+      itunesDuration: msToHMS(episode.duration),
+      author: data.station.name,
       enclosure: {
         url: episode.stream,
-        type: 'audio/mpeg'
+        type: 'audio/mpeg',
+        length: episode.duration
       }
     })
   })
