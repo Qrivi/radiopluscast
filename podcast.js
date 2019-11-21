@@ -111,7 +111,7 @@ app.get('/:showId', function (req, res) {
     })
   })
 
-  if (req.query.format.toLowerCase() === 'json') {
+  if (req.query.format && req.query.format.toLowerCase() === 'json') {
     return res.status(200)
       .json({
         status: 200,
