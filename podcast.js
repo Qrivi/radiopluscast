@@ -8,6 +8,7 @@ const Podcast = require('podcast')
 const app = express()
 const port = process.env.PORT || 3000
 
+// Configure date-format
 format.i18n = {
   dayNames: [
     'zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag',
@@ -22,9 +23,10 @@ format.i18n = {
   ]
 }
 
-function fetch (showId) {
+// Fetches Radioplus data for a certain programme
+function fetch (programmeId) {
   const state = JSON.parse(request('GET', 'https://state.radioplus.be').body.toString())
-  const match = state.find(station => station.data.ondemandnew.find(show => show.collectionID === showId))
+  const match = state.find(station => station.data.ondemandnew.find(programme => programme.collectionID === programmeId))
 
   if (!match) {
     return null
@@ -32,10 +34,11 @@ function fetch (showId) {
 
   return {
     station: match.channel.info,
-    show: match.data.ondemandnew.find(show => show.collectionID === showId)
+    programme: match.data.ondemandnew.find(programme => programme.collectionID === programmeId)
   }
 }
 
+// Converts a time period in ms to H:MM:SS format
 function msToHMS (ms) {
   let seconds = ms / 1000
 
@@ -47,36 +50,37 @@ function msToHMS (ms) {
   return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
+// Set up Express
 app.use(express.urlencoded({ extended: true }))
 
-app.get('/:showId', function (req, res) {
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(req.params.showId)) {
+app.get('/:programmeId', function (req, res) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(req.params.programmeId)) {
     return res.status(400)
       .json({
         status: 400,
         error: 'Bad Request',
-        message: 'The show UUID is malformatted'
+        message: 'The programme UUID is malformatted'
       })
   }
 
-  const data = fetch(req.params.showId)
+  const data = fetch(req.params.programmeId)
 
-  if (!data || !data.show) {
+  if (!data || !data.programme) {
     return res.status(404)
       .json({
         status: 404,
         error: 'Not Found',
-        message: 'The show UUID does not exist'
+        message: 'The programme UUID does not exist'
       })
   }
 
   const feed = new Podcast({
-    title: `${data.show.name}`,
+    title: `${data.programme.name}`,
     siteUrl: data.station.website,
-    imageUrl: data.show.image,
-    description: `Herbeluister de meest recente afleveringen van ${data.show.name} op ${data.station.name} - ${data.station.description}. ${data.show.description} `,
-    itunesSummary: `Herbeluister de meest recente afleveringen van ${data.show.name} op ${data.station.name} - ${data.station.description}. ${data.show.description} `,
-    itunesSubtitle: data.show.description,
+    imageUrl: data.programme.image,
+    description: `Herbeluister de meest recente afleveringen van ${data.programme.name} op ${data.station.name} - ${data.station.description}. ${data.programme.description} `,
+    itunesSummary: `Herbeluister de meest recente afleveringen van ${data.programme.name} op ${data.station.name} - ${data.station.description}. ${data.programme.description} `,
+    itunesSubtitle: data.programme.description,
     author: data.station.name,
     itunesAuthor: data.station.name,
     itunesOwner: 'VRT',
@@ -89,7 +93,7 @@ app.get('/:showId', function (req, res) {
     ttl: 60
   })
 
-  data.show.items.forEach(episode => {
+  data.programme.items.forEach(episode => {
     episode.endTime = new Date(episode.startTime)
     episode.endTime.setMilliseconds(episode.endTime.getMilliseconds() + episode.duration)
     episode.startTime = new Date(episode.startTime)
@@ -99,8 +103,8 @@ app.get('/:showId', function (req, res) {
       title: `${format(episode.startTime, 'dddd d mmmm, HH:MM')} - ${format(episode.endTime, 'HH:MM')}`,
       url: episode.stream,
       date: episode.startTime,
-      description: `Herbeluister ${data.show.name} van ${format(episode.startTime, 'ddd d mmmm yyyy')}. ${episode.description}`,
-      itunesSummary: `Herbeluister ${data.show.name} van ${format(episode.startTime, 'ddd d mmmm yyyy')}. ${episode.description}`,
+      description: `Herbeluister ${data.programme.name} van ${format(episode.startTime, 'ddd d mmmm yyyy')}. ${episode.description}`,
+      itunesSummary: `Herbeluister ${data.programme.name} van ${format(episode.startTime, 'ddd d mmmm yyyy')}. ${episode.description}`,
       itunesDuration: msToHMS(episode.duration),
       author: data.station.name,
       enclosure: {
