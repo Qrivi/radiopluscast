@@ -28,7 +28,7 @@
   "homepage": "https://github.com/Qrivi/radiopluscast#readme",
   "dependencies": {
     "dateformat": "^3.0.3",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "podcast": "^1.1.0",
     "sync-request": "^6.1.0"
   },
